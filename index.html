@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StyleVision — Agent IA Coiffure</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --obsidian: #1a1614;
+    --ivory: #f7f3ee;
+    --warm-mid: #e8e0d5;
+    --copper: #b87333;
+    --copper-light: #d4956a;
+    --sage: #8a9e8c;
+    --text-muted: #7a6e65;
+    --card-bg: #ffffff;
+    --border: #e0d8cf;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--ivory);
+    color: var(--obsidian);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--obsidian);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--ivory);
+    letter-spacing: 0.08em;
+  }
+
+  .logo span {
+    color: var(--copper-light);
+    font-style: italic;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--copper-light);
+    border: 1px solid var(--copper-light);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* MAIN LAYOUT */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 60px);
+  }
+
+  /* LEFT PANEL */
+  .left-panel {
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 32px 28px;
+    gap: 28px;
+  }
+
+  .panel-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--obsidian);
+    margin-bottom: 4px;
+  }
+
+  .panel-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--ivory);
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--copper);
+    background: #fdf8f3;
+  }
+
+  .upload-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .upload-zone p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .upload-zone strong {
+    color: var(--copper);
+    font-weight: 500;
+  }
+
+  #fileInput { display: none; }
+
+  /* SEPARATOR */
+  .or-sep {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .or-sep::before, .or-sep::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* WEBCAM */
+  .webcam-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--obsidian);
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .webcam-btn:hover {
+    border-color: var(--copper);
+    color: var(--copper);
+    background: #fdf8f3;
+  }
+
+  #webcamContainer {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #webcamContainer video {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .capture-btn {
+    padding: 10px;
+    background: var(--obsidian);
+    color: var(--ivory);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  .capture-btn:hover { background: var(--copper); }
+
+  /* STYLE SELECTOR */
+  .style-section h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--obsidian);
+  }
+
+  .style-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .style-card {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+  }
+
+  .style-card:hover {
+    border-color: var(--copper-light);
+    background: #fdf8f3;
+  }
+
+  .style-card.selected {
+    border-color: var(--copper);
+    background: #fdf8f3;
+  }
+
+  .style-card .emoji { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+  .style-card .label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--obsidian);
+    line-height: 1.3;
+  }
+
+  /* PREFERENCES */
+  .pref-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pref-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .pref-chip.active {
+    background: var(--obsidian);
+    color: var(--ivory);
+    border-color: var(--obsidian);
+  }
+
+  /* CTA */
+  .analyse-btn {
+    padding: 14px;
+    background: var(--copper);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .analyse-btn:hover:not(:disabled) { background: #9e6228; }
+  .analyse-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* RIGHT PANEL */
+  .right-panel {
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    overflow-y: auto;
+  }
+
+  /* PREVIEW */
+  .preview-area {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .photo-preview {
+    width: 200px;
+    flex-shrink: 0;
+  }
+
+  .photo-preview img {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: block;
+  }
+
+  .photo-placeholder {
+    width: 200px;
+    height: 240px;
+    background: var(--warm-mid);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    gap: 8px;
+    border: 1px solid var(--border);
+  }
+
+  /* RESULT CARD */
+  .result-card {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 28px;
+    flex: 1;
+  }
+
+  .result-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .result-style-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--copper);
+    background: #fdf8f3;
+    border: 1px solid var(--copper-light);
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .result-text {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: #3a3330;
+  }
+
+  .recommendations {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .rec-item {
+    background: var(--ivory);
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .rec-item h4 {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--copper);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  .rec-item p {
+    font-size: 0.82rem;
+    color: var(--obsidian);
+    line-height: 1.5;
+  }
+
+  /* LOOKS GALLERY */
+  .gallery-section h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .looks-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .look-card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .look-card:hover { border-color: var(--copper-light); transform: translateY(-2px); }
+  .look-card.selected-look { border-color: var(--copper); }
+
+  .look-visual {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .look-info {
+    padding: 10px 12px;
+  }
+
+  .look-name {
+    font-weight: 500;
+    font-size: 0.82rem;
+    margin-bottom: 2px;
+  }
+
+  .look-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* LOADING */
+  .loading-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border: 3px solid var(--border);
+    border-top-color: var(--copper);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    text-align: center;
+    gap: 16px;
+    color: var(--text-muted);
+  }
+
+  .empty-icon {
+    font-size: 3.5rem;
+    opacity: 0.4;
+  }
+
+  .empty-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    color: var(--obsidian);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .empty-sub {
+    font-size: 0.83rem;
+    line-height: 1.6;
+    max-width: 320px;
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .right-panel { padding: 24px 20px; }
+    .looks-grid { grid-template-columns: repeat(2, 1fr); }
+    .preview-area { flex-direction: column; }
+    .recommendations { grid-template-columns: 1fr; }
+    header { padding: 14px 20px; }
+    .left-panel { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Style<span>Vision</span></div>
+  <div class="badge">Agent IA · Coiffure</div>
+</header>
+
+<div class="main-grid">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+
+    <div>
+      <div class="panel-title">Votre photo</div>
+      <div class="panel-sub">Importez une photo ou activez la webcam pour analyser votre visage</div>
+    </div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <span class="upload-icon">📷</span>
+      <p><strong>Cliquez pour importer</strong> ou glissez votre photo ici<br>JPG, PNG — max 5 Mo</p>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="or-sep">ou</div>
+
+    <button class="webcam-btn" id="webcamToggle" onclick="toggleWebcam()">
+      <span>🎥</span> Utiliser la webcam
+    </button>
+
+    <div id="webcamContainer">
+      <video id="webcamVideo" autoplay playsinline></video>
+      <button class="capture-btn" onclick="captureWebcam()">📸 Capturer cette image</button>
+    </div>
+
+    <!-- STYLE SELECTOR -->
+    <div class="style-section">
+      <h3>Style souhaité</h3>
+      <div class="style-grid">
+        <div class="style-card" data-style="Naturel & doux" onclick="selectStyle(this)">
+          <span class="emoji">🌿</span>
+          <span class="label">Naturel</span>
+        </div>
+        <div class="style-card" data-style="Élégant & classique" onclick="selectStyle(this)">
+          <span class="emoji">✨</span>
+          <span class="label">Élégant</span>
+        </div>
+        <div class="style-card" data-style="Audacieux & moderne" onclick="selectStyle(this)">
+          <span class="emoji">⚡</span>
+          <span class="label">Audacieux</span>
+        </div>
+        <div class="style-card" data-style="Bohème & romantique" onclick="selectStyle(this)">
+          <span class="emoji">🌸</span>
+          <span class="label">Bohème</span>
+        </div>
+        <div class="style-card" data-style="Chic & minimaliste" onclick="selectStyle(this)">
+          <span class="emoji">◻️</span>
+          <span class="label">Minimaliste</span>
+        </div>
+        <div class="style-card" data-style="Rock & urbain" onclick="selectStyle(this)">
+          <span class="emoji">🎸</span>
+          <span class="label">Rock</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREFERENCES -->
+    <div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;margin-bottom:10px;">Vos préférences</h3>
+      <div class="pref-row" id="prefChips">
+        <span class="pref-chip" onclick="toggleChip(this)">Longueur courte</span>
+        <span class="pref-chip" onclick="toggleChip(this)">Mi-long</span>
+        <span class="pref-chip" onclick="toggleChip(this)">Longue</span>
+        <span class="pref-chip" onclick="toggleChip(this)">Couleur</span>
+        <span class="pref-chip" onclick="toggleChip(this)">Balayage</span>
+        <span class="pref-chip" onclick="toggleChip(this)">Entretien facile</span>
+        <span class="pref-chip" onclick="toggleChip(this)">Volume</span>
+        <span class="pref-chip" onclick="toggleChip(this)">Lissé</span>
+      </div>
+    </div>
+
+    <button class="analyse-btn" id="analyseBtn" disabled onclick="runAnalysis()">
+      ✦ Analyser &amp; Simuler
+    </button>
+
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel" id="rightPanel">
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">✦</div>
+      <div class="empty-title">Votre simulation vous attend</div>
+      <div class="empty-sub">Importez une photo, choisissez un style et laissez l'IA vous conseiller comme un visagiste expert.</div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading-state" id="loadingState">
+      <div class="spinner"></div>
+      <div class="loading-text">Analyse de votre morphologie en cours…</div>
+    </div>
+
+    <!-- RESULTS (hidden initially) -->
+    <div id="resultsArea" style="display:none;flex-direction:column;gap:28px;">
+
+      <div class="preview-area">
+        <div class="photo-preview">
+          <img id="previewImg" src="" alt="Votre photo">
+        </div>
+        <div class="result-card">
+          <div class="result-title" id="resultTitle">—</div>
+          <div class="result-style-tag" id="resultTag">Style</div>
+          <div class="result-text" id="resultText">…</div>
+          <div class="recommendations" id="recommendationsGrid"></div>
+        </div>
+      </div>
+
+      <div class="gallery-section">
+        <h2>Looks inspirants pour vous</h2>
+        <div class="looks-grid" id="looksGrid"></div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let capturedImageBase64 = null;
+  let selectedStyle = '';
+  let webcamStream = null;
+
+  const LOOKS_DATA = [
+    { name: 'Pixie Cut', desc: 'Court, affirmé', emoji: '✂️', bg: '#f3ede8', tags: ['Audacieux', 'court', 'moderne'] },
+    { name: 'Bob Carré', desc: 'Net, intemporel', emoji: '💎', bg: '#e8f0e8', tags: ['Élégant', 'classique', 'chic'] },
+    { name: 'Lob Ondulé', desc: 'Mi-long, romantique', emoji: '🌊', bg: '#e8eef3', tags: ['Bohème', 'volume', 'naturel'] },
+    { name: 'Shag Layers', desc: 'Rock, texturé', emoji: '⚡', bg: '#f0e8e8', tags: ['Rock', 'texture', 'moderne'] },
+    { name: 'Boucles naturelles', desc: 'Volume, liberté', emoji: '🌀', bg: '#f3f0e8', tags: ['Naturel', 'volume', 'bohème'] },
+    { name: 'Chignon haut', desc: 'Élégance soignée', emoji: '🪢', bg: '#e8e8f0', tags: ['Élégant', 'chic', 'classique'] },
+    { name: 'Balayage doré', desc: 'Lumineux, solaire', emoji: '☀️', bg: '#f3ede0', tags: ['Couleur', 'naturel', 'balayage'] },
+    { name: 'Undercut féminin', desc: 'Avant-garde', emoji: '🔥', bg: '#ede8f3', tags: ['Rock', 'audacieux', 'moderne'] },
+  ];
+
+  // UPLOAD
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    readFile(file);
+  });
+
+  const uploadZone = document.getElementById('uploadZone');
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file);
+  });
+
+  function readFile(file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      capturedImageBase64 = ev.target.result.split(',')[1];
+      uploadZone.innerHTML = `<span class="upload-icon">✅</span><p><strong>Photo chargée</strong><br>${file.name}</p>`;
+      checkReady();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // WEBCAM
+  async function toggleWebcam() {
+    const container = document.getElementById('webcamContainer');
+    if (container.style.display === 'flex') {
+      stopWebcam();
+      container.style.display = 'none';
+      document.getElementById('webcamToggle').innerHTML = '<span>🎥</span> Utiliser la webcam';
+      return;
+    }
+    try {
+      webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      document.getElementById('webcamVideo').srcObject = webcamStream;
+      container.style.display = 'flex';
+      document.getElementById('webcamToggle').innerHTML = '<span>⏹</span> Arrêter la webcam';
+    } catch (err) {
+      alert("Accès webcam refusé ou indisponible dans ce contexte.");
+    }
+  }
+
+  function stopWebcam() {
+    if (webcamStream) { webcamStream.getTracks().forEach(t => t.stop()); webcamStream = null; }
+  }
+
+  function captureWebcam() {
+    const video = document.getElementById('webcamVideo');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    capturedImageBase64 = canvas.toDataURL('image/jpeg').split(',')[1];
+    stopWebcam();
+    document.getElementById('webcamContainer').style.display = 'none';
+    document.getElementById('webcamToggle').innerHTML = '<span>✅</span> Photo capturée';
+    checkReady();
+  }
+
+  // STYLE SELECTION
+  function selectStyle(el) {
+    document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedStyle = el.dataset.style;
+    checkReady();
+  }
+
+  // CHIPS
+  function toggleChip(el) { el.classList.toggle('active'); }
+
+  function getActivePrefs() {
+    return [...document.querySelectorAll('.pref-chip.active')].map(c => c.textContent).join(', ');
+  }
+
+  // ENABLE BUTTON
+  function checkReady() {
+    document.getElementById('analyseBtn').disabled = !(capturedImageBase64 && selectedStyle);
+  }
+
+  // MAIN ANALYSIS
+  async function runAnalysis() {
+    const btn = document.getElementById('analyseBtn');
+    btn.disabled = true;
+
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('resultsArea').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'flex';
+
+    const prefs = getActivePrefs();
+
+    // ⚙️ REMPLACE cette URL par celle de ton projet Vercel après déploiement
+    const PROXY_URL = "https://TON-PROJET.vercel.app/api/analyze";
+
+    try {
+      const response = await fetch(PROXY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64: capturedImageBase64,
+          style: selectedStyle,
+          preferences: prefs || 'non précisées'
+        })
+      });
+
+      const data = await response.json();
+      const rawText = data.content.map(b => b.text || '').join('');
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      const result = JSON.parse(clean);
+
+      displayResults(result);
+
+    } catch (err) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'flex';
+      document.getElementById('emptyState').innerHTML = `
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Analyse impossible</div>
+        <div class="empty-sub">Une erreur s'est produite. Vérifiez votre connexion et réessayez.<br><small style="color:#999">${err.message}</small></div>
+      `;
+      btn.disabled = false;
+    }
+  }
+
+  function displayResults(result) {
+    // Set preview image
+    const imgSrc = 'data:image/jpeg;base64,' + capturedImageBase64;
+    document.getElementById('previewImg').src = imgSrc;
+
+    // Set text
+    document.getElementById('resultTitle').textContent = result.titre;
+    document.getElementById('resultTag').textContent = selectedStyle;
+    document.getElementById('resultText').textContent = result.analyse + ' ' + result.recommendation;
+
+    // Recommendations grid
+    const grid = document.getElementById('recommendationsGrid');
+    grid.innerHTML = (result.recs || []).map(r => `
+      <div class="rec-item">
+        <h4>${r.titre}</h4>
+        <p>${r.contenu}</p>
+      </div>
+    `).join('');
+
+    // Looks gallery — recommended first
+    const recommended = result.looks_recommandes || [];
+    const sorted = [
+      ...LOOKS_DATA.filter(l => recommended.includes(l.name)),
+      ...LOOKS_DATA.filter(l => !recommended.includes(l.name))
+    ];
+
+    document.getElementById('looksGrid').innerHTML = sorted.map((look, i) => {
+      const isRec = recommended.includes(look.name);
+      return `
+        <div class="look-card ${isRec ? 'selected-look' : ''}" title="${look.name}">
+          <div class="look-visual" style="background:${look.bg}">
+            ${look.emoji}
+            ${isRec ? '<div style="position:absolute;top:8px;right:8px;background:#b87333;color:white;border-radius:10px;padding:2px 7px;font-size:0.65rem;font-weight:600;">✦ Pour vous</div>' : ''}
+          </div>
+          <div class="look-info">
+            <div class="look-name">${look.name}</div>
+            <div class="look-desc">${look.desc}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Show results
+    document.getElementById('loadingState').style.display = 'none';
+    const area = document.getElementById('resultsArea');
+    area.style.display = 'flex';
+
+    document.getElementById('analyseBtn').disabled = false;
+  }
+</script>
+
+</body>
+</html>
